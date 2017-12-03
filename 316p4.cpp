@@ -27,18 +27,19 @@ struct Hash_Entry
 
 const int TABLE_SIZE = 10001;
 
-struct Hash_Map
+struct Hash_Table
 {
     Hash_Entry ** table;
     
-    Hash_Map()
+    int collision_counter;
+    
+    Hash_Table()
     {
+        collision_counter = 0;
+        
         table = new Hash_Entry* [TABLE_SIZE];
         
-        for(int i = 0; i < TABLE_SIZE; i++)
-        {
-            table[i] = NULL;
-        }
+        this->clear();
     }
     
     int get(int key)
@@ -59,23 +60,41 @@ struct Hash_Map
         }
     }
     
-    void put(int key, int value)
+    void insert_linear(int key, int value)
     {
         int hash = (key % TABLE_SIZE);
         
         while(table[hash] != NULL && table[hash]->getKey() != key)
         {
-            hash = (hash + 1)  % TABLE_SIZE;
+           hash = (hash + 1) % TABLE_SIZE;
         }
-        if(table[hash] != NULL)
+        while(table[hash] != NULL)
         {
-            delete table[hash];
+            collision_counter++;
+            hash = (hash + 1) % TABLE_SIZE;
         }
         
         table[hash] = new Hash_Entry(key, value);
     }
     
-    ~Hash_Map()
+    void insert_quadratic(int key, int value)
+    {
+        
+        
+    }
+    
+    void insert_double(int key, int value)
+    {
+        
+        
+    }
+    
+    void clear_count()
+    {
+        this->collision_counter = 0;
+    }
+    
+    ~Hash_Table()
     {
         for(int i = 0; i < TABLE_SIZE; i++)
         {
@@ -83,8 +102,19 @@ struct Hash_Map
             {
                 delete table[i];
             }
-            
-            delete table;
+        }
+        
+        delete table;
+    }
+    
+    void clear()
+    {
+        for(int i = 0; i < TABLE_SIZE; i++)
+        {
+            if(table[i] != NULL)
+            {
+                table[i] = NULL;
+            }
         }
     }
 };
@@ -103,6 +133,7 @@ struct Sequence_Array
     {
         this->size_of_array = size;
         sequence_array = new int* [size];
+        this->clear();
     }
     
     ~Sequence_Array()
@@ -114,6 +145,8 @@ struct Sequence_Array
                 delete sequence_array[i];
             }
         }
+        
+        delete sequence_array;
     }
     
     void push_back(int* sequence)
@@ -125,6 +158,18 @@ struct Sequence_Array
                 sequence_array[i] = sequence;
                 break;
             }
+        }
+    }
+    
+    void clear()
+    {
+        for (int i = 0; i < size_of_array; i++)
+        {
+            if(sequence_array[i] != NULL)
+            {
+                sequence_array[i] = NULL;
+            }
+            
         }
     }
     
@@ -155,6 +200,7 @@ int* generatedSequence(int size)
 
 int main(int argc, char** argv)
 {
+    Hash_Table test_table;
     
     //This is a structure that holds an array of int*
     Sequence_Array aos(10);
@@ -165,7 +211,18 @@ int main(int argc, char** argv)
         aos.push_back(generatedSequence(i));
     }
     
+    //testing
+    
+    int* test_array = generatedSequence(1000);
+    
+    for(int i = 0; i < 1000; i++)
+    {
+        //test_table.insert_linear(i, test_array[i]);
+    }
+    
     std::cout << "SEQUENCES CREATED\n";
+    
+    //std::cout << "Collisions: " << test_table.collision_counter;
     
     return 0;
     
