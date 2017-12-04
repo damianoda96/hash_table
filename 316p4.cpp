@@ -82,6 +82,24 @@ struct Hash_Table
     
     void insert_quadratic(int key, int value)
     {
+        int hash = (key % TABLE_SIZE);
+        
+        int i = 0;
+        
+        while(table[hash] != NULL && table[hash]->getKey() != key)
+        {
+            collision_counter++;
+            i++;
+            //only difference// instead of + 1, i*i
+            hash = (hash + (i*i)) % TABLE_SIZE;
+        }
+        
+        if(table[hash] != NULL)
+        {
+            delete table[hash];
+        }
+        
+        table[hash] = new Hash_Entry(key, value);
         
         
     }
@@ -272,8 +290,34 @@ int main(int argc, char** argv)
     
     std::cout << std::endl;
     
+    test_table.clear_count();
+    test_table.clear();
+    
     //output quadratic///////////////////////////////////////////
     
+    std::cout << std::endl << "Quadratic:  ";
+    
+    array_index = 0;
+    
+    for(int i = 1000; i <= 10000; i+=1000)
+    {
+        int* array = aos.return_sequence(array_index);
+        
+        for(int j = 0; j < i; j++)
+        {
+            //insert random key and integer value
+            test_table.insert_quadratic((rand() % 32767), array[j]);
+        }
+        
+        std::cout << test_table.collision_counter << "\t";
+        test_table.clear_count();
+        test_table.clear();
+        
+        array_index++;
+        
+    }
+    
+    std::cout << std::endl;
     
     //output double/////////////////////////
     
