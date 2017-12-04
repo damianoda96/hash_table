@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <vector>
 
 struct Hash_Entry
 {
@@ -66,15 +67,17 @@ struct Hash_Table
         
         while(table[hash] != NULL && table[hash]->getKey() != key)
         {
+           collision_counter++;
            hash = (hash + 1) % TABLE_SIZE;
         }
-        while(table[hash] != NULL)
+
+        if(table[hash] != NULL)
         {
-            collision_counter++;
-            hash = (hash + 1) % TABLE_SIZE;
+            delete table[hash];
         }
         
         table[hash] = new Hash_Entry(key, value);
+        
     }
     
     void insert_quadratic(int key, int value)
@@ -117,6 +120,21 @@ struct Hash_Table
             }
         }
     }
+    
+    int size()
+    {
+        int count = 0;
+        
+        for(int i = 0; i < TABLE_SIZE; i++)
+        {
+            if(table[i] != NULL)
+            {
+                count++;
+            }
+        }
+        
+        return count;
+    }
 };
 
 struct Sequence_Array
@@ -126,6 +144,7 @@ struct Sequence_Array
     
     Sequence_Array()
     {
+        size_of_array = 0;
         sequence_array = NULL;
     }
     
@@ -177,6 +196,12 @@ struct Sequence_Array
     {
         return size_of_array;
     }
+    
+    int* return_sequence(int index)
+    {
+        return sequence_array[index];
+    }
+
 };
 
 int* generatedSequence(int size)
@@ -189,7 +214,7 @@ int* generatedSequence(int size)
     
     for(int i = 0; i < size; i++)
     {
-        random_integer = rand() % 9;
+        random_integer = rand() % 32767;
             
         sequence[i] = random_integer;
     }
@@ -211,18 +236,50 @@ int main(int argc, char** argv)
         aos.push_back(generatedSequence(i));
     }
     
-    //testing
-    
-    int* test_array = generatedSequence(1000);
-    
-    for(int i = 0; i < 1000; i++)
-    {
-        //test_table.insert_linear(i, test_array[i]);
-    }
-    
     std::cout << "SEQUENCES CREATED\n";
     
-    //std::cout << "Collisions: " << test_table.collision_counter;
+    //output size///////////////////////////
+    std::cout << "Size:\t";
+    
+    for(int i = 1000; i <= 10000; i+=1000)
+    {
+        std::cout << i << "\t";
+    }
+    
+    //output linear/////////////////////////////
+    
+    std::cout << std::endl << "Linear:\t";
+    
+    int array_index = 0;
+    
+    for(int i = 1000; i <= 10000; i+=1000)
+    {
+        int* array = aos.return_sequence(array_index);
+        
+        for(int j = 0; j < i; j++)
+        {
+            //insert random key and integer value
+            test_table.insert_linear((rand() % 32767), array[j]);
+        }
+        
+        std::cout << test_table.collision_counter << "\t";
+        test_table.clear_count();
+        test_table.clear();
+        
+        array_index++;
+    
+    }
+    
+    std::cout << std::endl;
+    
+    //output quadratic///////////////////////////////////////////
+    
+    
+    //output double/////////////////////////
+    
+    
+    
+    ///////////////////////////////////////////
     
     return 0;
     
