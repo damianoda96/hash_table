@@ -63,12 +63,12 @@ struct Hash_Table
     
     void insert_linear(int key, int value)
     {
-        int hash = (key % TABLE_SIZE);
+        int hash = hash_function(key);
         
         while(table[hash] != NULL && table[hash]->getKey() != key)
         {
-           collision_counter++;
-           hash = (hash + 1) % TABLE_SIZE;
+            collision_counter++;
+            hash = hash_function(hash + 1);
         }
 
         if(table[hash] != NULL)
@@ -82,7 +82,7 @@ struct Hash_Table
     
     void insert_quadratic(int key, int value)
     {
-        int hash = (key % TABLE_SIZE);
+        int hash = hash_function(key);
         
         int i = 0;
         
@@ -91,7 +91,7 @@ struct Hash_Table
             collision_counter++;
             i++;
             //only difference// instead of + 1, i*i
-            hash = (hash + (i*i)) % TABLE_SIZE;
+            hash = hash_function(hash + (i*i));
         }
         
         if(table[hash] != NULL)
@@ -104,9 +104,44 @@ struct Hash_Table
         
     }
     
-    void insert_double(int key, int value)
+    int hash_function(int key)
+    {
+        return (key % TABLE_SIZE);
+    }
+    
+    int hash_function_double(int key)
     {
         
+        return (TABLE_SIZE - (key % TABLE_SIZE));
+    }
+    
+    void insert_double(int key, int value)
+    {
+        int hash = hash_function(key);
+        int hash2 = hash_function_double(key);
+        
+        int i = 1;
+        
+        while(table[hash] != NULL && table[hash]->getKey() != key)
+        {
+            collision_counter++;
+            //hash = ((hash_function(hash) + (i * hash_function_double(hash))) % TABLE_SIZE);
+            
+            //FIGURE THIS OUT
+            
+            //hash = (i * hash_function(hash + 1));
+            
+            hash = (hash + (i * hash2)) % TABLE_SIZE;
+            
+            i++;
+        }
+        
+        if(table[hash] != NULL)
+        {
+            delete table[hash];
+        }
+        
+        table[hash] = new Hash_Entry(key, value);
         
     }
     
@@ -319,9 +354,34 @@ int main(int argc, char** argv)
     
     std::cout << std::endl;
     
+    test_table.clear_count();
+    test_table.clear();
+    
     //output double/////////////////////////
     
+    std::cout << std::endl << "Double:  ";
     
+    array_index = 0;
+    
+    for(int i = 1000; i <= 10000; i+=1000)
+    {
+        int* array = aos.return_sequence(array_index);
+        
+        for(int j = 0; j < i; j++)
+        {
+            //insert random key and integer value
+            test_table.insert_double((rand() % 32767), array[j]);
+        }
+        
+        std::cout << test_table.collision_counter << "\t";
+        test_table.clear_count();
+        test_table.clear();
+        
+        array_index++;
+        
+    }
+    
+    std::cout << std::endl;
     
     ///////////////////////////////////////////
     
